@@ -36,7 +36,6 @@ def player(board):
         return X
     
 
-
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
@@ -45,7 +44,7 @@ def actions(board):
     for i in range(3):
         for j in range(3):
             if board[i][j] == EMPTY:
-                moves.add((i,j))
+                moves.add((i, j))
     return moves
 
 
@@ -66,12 +65,13 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    if checkRows(board, X)  or checkColumns(board, X) or checkTopToBottomDiagonal(board, X) or checkBottomToTopDiagonal(board, X):
+    if checkRows(board, X) or checkColumns(board, X) or checkTopToBottomDiagonal(board, X) or checkBottomToTopDiagonal(board, X):
         return X
-    elif checkRows(board, O)  or checkColumns(board, O) or checkTopToBottomDiagonal(board, O) or checkBottomToTopDiagonal(board, O):
+    elif checkRows(board, O) or checkColumns(board, O) or checkTopToBottomDiagonal(board, O) or checkBottomToTopDiagonal(board, O):
         return O
     else:
         return None
+
 
 def checkRows(board, player):
     for i in range(len(board)):
@@ -83,6 +83,7 @@ def checkRows(board, player):
             return True 
     return False
 
+
 def checkColumns(board, player):
     for j in range(len(board[0])):
         count = 0
@@ -93,6 +94,7 @@ def checkColumns(board, player):
             return True
     return False
 
+
 def checkTopToBottomDiagonal(board, player):
     count = 0
     for i in range(len(board)):
@@ -100,6 +102,7 @@ def checkTopToBottomDiagonal(board, player):
             if i == j and board[i][j] == player:
                 count += 1
     return count == len(board[0])
+
 
 def checkBottomToTopDiagonal(board, player):
     count = 0
@@ -121,10 +124,9 @@ def terminal(board):
         
     for i in range(3):
         for j in range(3):
-            if  board[i][j] == None:
+            if board[i][j] == None:
                 return False
     return True
-
 
 
 def utility(board):
@@ -141,44 +143,54 @@ def utility(board):
 
 def minimax(board):
     """
-    Returns the optimal action for the current player on the board.
+    Retorna a jogada ótima para o jogador atual no tabuleiro.
     """
     if terminal(board):
         return None
-    Max = float("-inf")
-    Min = float("inf")
 
     if player(board) == X:
-        return Max_Value(board, Max, Min)[1]
+        return max_value(board)[1]  
     else:
-        return Min_Value(board, Max, Min)[1]
+        return min_value(board)[1]  
 
-def Max_Value(board, Max, Min):
-    move = None
-    if terminal(board):
-        return [utility(board), None];
-    v = float('-inf')
-    for action in actions(board):
-        test = Min_Value(result(board, action), Max, Min)[0]
-        Max = max(Max, test)
-        if test > v:
-            v = test
-            move = action
-        if Max >= Min:
-            break
-    return [v, move];
 
-def Min_Value(board, Max, Min):
-    move = None
+def max_value(board):
+    """
+    Retorna o melhor valor e a melhor jogada para X no tabuleiro.
+    """
     if terminal(board):
-        return [utility(board), None];
-    v = float('inf')
+        return utility(board), None  
+
+    max_val = float('-inf')
+    best_move = None
+
     for action in actions(board):
-        test = Max_Value(result(board, action), Max, Min)[0]
-        Min = min(Min, test)
-        if test < v:
-            v = test
-            move = action
-        if Max >= Min:
-            break
-    return [v, move];
+        # Avalia o movimento atual e calcula o valor para o próximo jogador (O)
+        val = min_value(result(board, action))[0]
+        
+        if val > max_val:
+            max_val = val
+            best_move = action
+
+    return max_val, best_move
+
+
+def min_value(board):
+    """
+    Retorna o melhor valor e a melhor jogada para O no tabuleiro.
+    """
+    if terminal(board):
+        return utility(board), None  
+
+    min_val = float('inf')
+    best_move = None
+
+    for action in actions(board):
+        # Avalia o movimento atual e calcula o valor para o próximo jogador (X)
+        val = max_value(result(board, action))[0]
+        
+        if val < min_val:
+            min_val = val
+            best_move = action
+
+    return min_val, best_move
